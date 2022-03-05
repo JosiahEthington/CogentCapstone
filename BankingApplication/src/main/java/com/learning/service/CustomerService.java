@@ -7,11 +7,11 @@ import com.learning.payload.request.*;
 import com.learning.payload.response.*;
 
 public interface CustomerService {
-	public RegisterUserResponse registerCustomer();
+	public RegisterUserResponse registerCustomer(RegisterRequest request);
 	public String authenticate(AuthenticateRequest request);
 	public AccountCreationResponse addAccount(long customerID, CreateAccountRequest request);
 	public ApproveAccountResponse approveAccount(long customerID, long accountNo, ApproveAccountRequest request);
-	public List<AccountSummary> getCustomerAccounts(long customerID);
+	public List<AccountSummaryResponse> getCustomerAccounts(long customerID);
 	public GetCustomerResponse getCustomer(long customerID);
 	public UpdateCustomerResponse updateCustomer(long customerID, Customer customer);
 	public AccountDetailsResponse getCustomerAccount(long customerID, long accountID);

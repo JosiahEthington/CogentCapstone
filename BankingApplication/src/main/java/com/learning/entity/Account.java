@@ -18,6 +18,7 @@ import com.learning.enums.AccountType;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
@@ -46,4 +47,6 @@ public class Account {
 	
 	@OneToMany
 	private List<Transaction> transactions;
+	
+	
 }

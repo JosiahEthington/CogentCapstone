@@ -1,6 +1,7 @@
 package com.learning.entity;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.Entity;
@@ -20,15 +21,14 @@ import lombok.NoArgsConstructor;
 @Entity
 public class Customer extends User {
 
-	@NotBlank
 	private String phone;
 	
 	private String pan;
 	
 	private String aadhar;
-	@NotBlank
+	
 	private String secretQuestion;
-	@NotBlank
+
 	private String secretAnswer;
 	
 	private LocalDate createdDate;

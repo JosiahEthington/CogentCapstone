@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AccountSummary {
+public class AccountSummaryResponse {
 	private long accountNumber;
 	private AccountType accountType;
 	private double balance;
