@@ -1,12 +1,14 @@
 package com.learning.service.impl;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.learning.entity.Account;
 import com.learning.entity.Beneficiary;
@@ -21,6 +23,7 @@ import com.learning.payload.request.ApproveAccountRequest;
 import com.learning.payload.request.AuthenticateRequest;
 import com.learning.payload.request.CreateAccountRequest;
 import com.learning.payload.request.RegisterRequest;
+import com.learning.payload.request.SecretAnswerRequest;
 import com.learning.payload.request.TransferRequest;
 import com.learning.payload.request.UpdateCustomerRequest;
 import com.learning.payload.request.UpdatePasswordRequest;
@@ -32,13 +35,17 @@ import com.learning.payload.response.BeneficiarySummary;
 import com.learning.payload.response.GetCustomerResponse;
 import com.learning.payload.response.RegisterUserResponse;
 import com.learning.payload.response.UpdateCustomerResponse;
+import com.learning.repo.AccountRepo;
 import com.learning.repo.CustomerRepo;
 import com.learning.service.CustomerService;
 
+@Service
 public class CustomerServiceImpl implements CustomerService {
 
 	@Autowired
 	CustomerRepo customerRepo;
+	@Autowired
+	AccountRepo accountRepo;
 
 	@Override
 	public RegisterUserResponse registerCustomer(RegisterRequest request) {
@@ -267,26 +274,70 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Override
 	public String transferFunds(TransferRequest request) {
-		// TODO Auto-generated method stub
-		return null;
+		Transaction transaction = new Transaction();
+		// First, retrieve the appropriate accounts.
+		Account fromAccount = accountRepo.findById(request.getFromAccount())
+				.orElseThrow(() -> new NoDataFoundException("From Account Not Valid"));
+		transaction.setFromAccount(fromAccount);
+		Account toAccount = accountRepo.findById(request.getToAccount())
+				.orElseThrow(() -> new NoDataFoundException("To Account Not Valid"));
+		transaction.setToAccount(toAccount);
+		// if we want to do validity checking, here would be good. From Account should
+		// be part of request.customer's Account Set. To Account should be part of
+		// Customer's beneficiary list. next, input details about the transaction.
+		transaction.setAmount(request.getAmount());
+		transaction.setDateTime(LocalDateTime.now());
+		transaction.setReference(request.getReason());
+		// Add the transaction to the affected accounts.
+		fromAccount.getTransactions().add(transaction);
+		toAccount.getTransactions().add(transaction);
+		// Temp variable stores balance and calculates new balance.
+		double temp = fromAccount.getAccountBalance();
+		// subtract amount from fromAccount's balance.
+		temp -= transaction.getAmount();
+		// Might check to ensure temp is still positive, throw NSF if not?
+		fromAccount.setAccountBalance(temp);
+
+		temp = toAccount.getAccountBalance();
+		// Add amount to toAccount's balance.
+		temp += transaction.getAmount();
+		toAccount.setAccountBalance(temp);
+		// Save the affected accounts.
+		accountRepo.save(fromAccount);
+		accountRepo.save(toAccount);
+		return "Transfer complete";
 	}
 
 	@Override
 	public String getQuestion(String username) {
-		// TODO Auto-generated method stub
-		return null;
+		// Get the customer
+		Customer customer = customerRepo.findByUsername(username)
+				.orElseThrow(() -> new NoDataFoundException("User not found"));
+		// Return the customer's secret question.
+		return customer.getSecretQuestion();
 	}
 
 	@Override
-	public String validateAnswer(String username, String answer) {
-		// TODO Auto-generated method stub
-		return null;
+	public String validateAnswer(String username, SecretAnswerRequest request) {
+		// Get the customer
+		Customer customer = customerRepo.findByUsername(username)
+				.orElseThrow(() -> new NoDataFoundException("User not found"));
+		// compare the provided answer with the stored answer
+		if (customer.getSecretAnswer().equalsIgnoreCase(request.getAnswer())) {
+			// if they match, good.
+			return "Details validated";
+		}
+		// if the don't match.
+		return "Sorry your secret details are not matching";
 	}
 
 	@Override
 	public String updatePassword(String username, UpdatePasswordRequest request) {
-		// TODO Auto-generated method stub
-		return null;
+		Customer customer = customerRepo.findByUsername(username)
+				.orElseThrow(() -> new NoDataFoundException("Sorry password not updated"));
+		customer.setPassword(request.getNewPassword());
+		customerRepo.save(customer);
+		return "new password updated";
 	}
 
 	@Override

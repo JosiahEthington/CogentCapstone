@@ -16,7 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.learning.payload.request.AddBeneficiaryRequest;
 import com.learning.payload.request.ApproveAccountRequest;
 import com.learning.payload.request.CreateAccountRequest;
+import com.learning.payload.request.SecretAnswerRequest;
+import com.learning.payload.request.TransferRequest;
 import com.learning.payload.request.UpdateCustomerRequest;
+import com.learning.payload.request.UpdatePasswordRequest;
 import com.learning.payload.response.AccountCreationResponse;
 import com.learning.service.CustomerService;
 
@@ -78,4 +81,29 @@ public class CustomerController {
 			@PathVariable("beneficiaryID") Long beneficiaryId) {
 		return ResponseEntity.ok(customerService.deleteBeneficiary(customerId, beneficiaryId));
 	}
+
+	@PutMapping("/transfer")
+	public ResponseEntity<?> transferFunds(@Valid @RequestBody TransferRequest request) {
+		return ResponseEntity.status(200).body(customerService.transferFunds(request));
+	}
+
+	@GetMapping("/:username/forgot/question")
+	public ResponseEntity<?> getQuestion(@PathVariable("username") String username) {
+		return ResponseEntity.ok(customerService.getQuestion(username));
+	}
+
+	@GetMapping("/:username/forgot/answer")
+	public ResponseEntity<?> getQuestion(@PathVariable("username") String username,
+			@RequestBody SecretAnswerRequest answer) {
+		// May want this to produce JWT token on success, as per authenticate?
+		return ResponseEntity.ok(customerService.validateAnswer(username, answer));
+	}
+
+	// Preauthorize this one as customer?
+	@PutMapping("/:username/forgot")
+	public ResponseEntity<?> updatePassword(@Valid @PathVariable("username") String username,
+			@RequestBody UpdatePasswordRequest request) {
+		return ResponseEntity.status(200).body(customerService.updatePassword(username, request));
+	}
+
 }

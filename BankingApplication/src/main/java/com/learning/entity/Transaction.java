@@ -26,10 +26,15 @@ public class Transaction {
 	private LocalDateTime dateTime;
 	private String reference;
 	private double amount;
-	private TransactionType type;
+	//private TransactionType type;
 	
 	@ManyToOne
 	@NotNull
 	@JsonIgnore
-	private Account account;
+	private Account fromAccount;
+	
+	@ManyToOne
+	@NotNull
+	@JsonIgnore
+	private Account toAccount;
 }

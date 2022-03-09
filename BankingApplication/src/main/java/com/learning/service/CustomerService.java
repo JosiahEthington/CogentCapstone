@@ -20,7 +20,7 @@ public interface CustomerService {
 	public String deleteBeneficiary(long customerID, long beneficiaryID);
 	public String transferFunds(TransferRequest request);
 	public String getQuestion(String username);
-	public String validateAnswer(String username, String answer);
+	public String validateAnswer(String username, SecretAnswerRequest answer);
 	public String updatePassword(String username, UpdatePasswordRequest request);
 	
 }
