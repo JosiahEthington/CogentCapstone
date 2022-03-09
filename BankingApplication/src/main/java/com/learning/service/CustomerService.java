@@ -13,7 +13,7 @@ public interface CustomerService {
 	public ApproveAccountResponse approveAccount(long customerID, long accountNo, ApproveAccountRequest request);
 	public List<AccountSummaryResponse> getCustomerAccounts(long customerID);
 	public GetCustomerResponse getCustomer(long customerID);
-	public UpdateCustomerResponse updateCustomer(long customerID, Customer customer);
+	public UpdateCustomerResponse updateCustomer(long customerID, UpdateCustomerRequest customer);
 	public AccountDetailsResponse getCustomerAccount(long customerID, long accountID);
 	public String addBeneficiary(long customerID, AddBeneficiaryRequest request);
 	public List<BeneficiarySummary> getBeneficiaries(long customerID);

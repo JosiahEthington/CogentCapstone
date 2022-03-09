@@ -25,7 +25,11 @@ public class Customer extends User {
 	
 	private String pan;
 	
+	private String panImage;
+	
 	private String aadhar;
+	
+	private String aadharImage;
 	
 	private String secretQuestion;
 
@@ -39,5 +43,5 @@ public class Customer extends User {
 	private Set<Account> accounts;
 	
 	@OneToMany
-	private Set<Beneficiary> beneficiaries;
+	private Set<Beneficiary> beneficiaries = new HashSet<>();
 }

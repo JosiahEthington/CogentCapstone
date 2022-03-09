@@ -1,20 +1,20 @@
-package com.learning.payload.response;
+package com.learning.payload.request;
 //Use Case PUT /api/customer/:customerID
+
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class UpdateCustomerResponse {
-	private long customerId;
+@AllArgsConstructor
+public class UpdateCustomerRequest {
 	private String fullname;
 	private String phone;
 	private String pan;
-	private String panImage;
 	private String aadhar;
-	private String aadharImage;
 	private String secretQuestion;
 	private String secretAnswer;
+	private String panImage;
+	private String aadharImage;
 }

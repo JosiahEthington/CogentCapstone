@@ -2,15 +2,18 @@ package com.learning.service.impl;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.learning.entity.Account;
+import com.learning.entity.Beneficiary;
 import com.learning.entity.Customer;
 import com.learning.entity.Transaction;
 import com.learning.enums.EnabledStatus;
+import com.learning.enums.IsActive;
 import com.learning.exception.AccountCreationException;
 import com.learning.exception.NoDataFoundException;
 import com.learning.payload.request.AddBeneficiaryRequest;
@@ -19,6 +22,7 @@ import com.learning.payload.request.AuthenticateRequest;
 import com.learning.payload.request.CreateAccountRequest;
 import com.learning.payload.request.RegisterRequest;
 import com.learning.payload.request.TransferRequest;
+import com.learning.payload.request.UpdateCustomerRequest;
 import com.learning.payload.request.UpdatePasswordRequest;
 import com.learning.payload.response.AccountCreationResponse;
 import com.learning.payload.response.AccountDetailsResponse;
@@ -35,40 +39,44 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Autowired
 	CustomerRepo customerRepo;
+
 	@Override
 	public RegisterUserResponse registerCustomer(RegisterRequest request) {
-		//create a customer from the request
+		// create a customer from the request
 		Customer customer = new Customer();
 		customer.setFullname(request.getFullname());
 		customer.setUsername(request.getUsername());
-		customer.setPassword(request.getPassword()); //should encrypt password here.
-		//customer creation date is now.
+		customer.setPassword(request.getPassword()); // should encrypt password here.
+		// customer creation date is now.
 		customer.setCreatedDate(LocalDate.now());
-		//save customer to DB
+		// save customer to DB
 		Customer temp = customerRepo.save(customer);
-		//Create response from the DB returned customer.
+		// Create response from the DB returned customer.
 		RegisterUserResponse response = new RegisterUserResponse();
 		response.setFullname(temp.getFullname());
 		response.setId(temp.getId());
-		response.setPassword(temp.getPassword());//should be encrypted password.
+		response.setPassword(temp.getPassword());// should be encrypted password.
 		response.setUsername(temp.getUsername());
 		return response;
 	}
 
 	@Override
 	public String authenticate(AuthenticateRequest request) {
-		Customer customer = customerRepo.findByUsername(request.getUsername()).orElseThrow(()-> new NoDataFoundException("user not found"));
+		Customer customer = customerRepo.findByUsername(request.getUsername())
+				.orElseThrow(() -> new NoDataFoundException("user not found"));
 		return "JWT TOKEN HERE";
 	}
 
 	@Override
 	public AccountCreationResponse addAccount(long customerID, CreateAccountRequest request) {
 		Account newAccount = new Account();
-		//Retrieve customer based on URL
-		Customer currentCustomer = customerRepo.findById(customerID).orElseThrow(()->new NoDataFoundException("Customer Not Found"));
-		//Store list of customer's current accounts, so we can tell which one is new, later.
+		// Retrieve customer based on URL
+		Customer currentCustomer = customerRepo.findById(customerID)
+				.orElseThrow(() -> new NoDataFoundException("Customer Not Found"));
+		// Store list of customer's current accounts, so we can tell which one is new,
+		// later.
 		Set<Account> oldAccounts = currentCustomer.getAccounts();
-		//Set all attributes of new account, based on defaults, and on request.
+		// Set all attributes of new account, based on defaults, and on request.
 		newAccount.setAccountBalance(request.getAccountBalance());
 		newAccount.setAccountType(request.getAccountType());
 		newAccount.setApproved(request.getApproved());
@@ -76,20 +84,22 @@ public class CustomerServiceImpl implements CustomerService {
 		newAccount.setCustomer(currentCustomer);
 		newAccount.setDateOfCreation(LocalDate.now());
 		newAccount.setTransactions(new ArrayList<Transaction>());
-		//Add created account to customer.
+		// Add created account to customer.
 		currentCustomer.getAccounts().add(newAccount);
-		//Save customer to update list of accounts.  The returned Customer should have the
-		//newly created Account, with its generated Account Number.
+		// Save customer to update list of accounts. The returned Customer should have
+		// the
+		// newly created Account, with its generated Account Number.
 		Customer updatedCustomer = customerRepo.save(currentCustomer);
 		Set<Account> newAccounts = updatedCustomer.getAccounts();
-		//Compare the sets to find the newly created Account.
+		// Compare the sets to find the newly created Account.
 		newAccounts.removeAll(oldAccounts);
-		//newAccounts should have exactly 1 account in it. If it doesn't, something is wrong.
-		if(newAccounts.isEmpty() || newAccounts.size() >1) {
+		// newAccounts should have exactly 1 account in it. If it doesn't, something is
+		// wrong.
+		if (newAccounts.isEmpty() || newAccounts.size() > 1) {
 			throw new AccountCreationException("Account Creation Failed");
 		}
-		Account createdAccount = ((Account[])newAccounts.toArray())[0];
-		//Populate the response with the details of the new Account.
+		Account createdAccount = ((Account[]) newAccounts.toArray())[0];
+		// Populate the response with the details of the new Account.
 		AccountCreationResponse result = new AccountCreationResponse();
 		result.setAccountType(createdAccount.getAccountType());
 		result.setAccountBalance(createdAccount.getAccountBalance());
@@ -104,33 +114,33 @@ public class CustomerServiceImpl implements CustomerService {
 	@Override
 	public ApproveAccountResponse approveAccount(long customerID, long accountNo, ApproveAccountRequest request) {
 		// find the current customer
-		Customer currentCustomer = customerRepo.findById(customerID).orElseThrow(()->new NoDataFoundException("Customer Not Found"));
+		Customer currentCustomer = customerRepo.findById(customerID)
+				.orElseThrow(() -> new NoDataFoundException("Customer Not Found"));
 		// get all the accounts
-		Set<Account> accounts= currentCustomer.getAccounts();
+		Set<Account> accounts = currentCustomer.getAccounts();
 		ApproveAccountResponse accountResponse = new ApproveAccountResponse();
-		//for each loop to iterate the accounts
-		for (Account account: accounts) {
-			if(account.getAccountNumber() == accountNo) {
+		// for each loop to iterate the accounts
+		for (Account account : accounts) {
+			if (account.getAccountNumber() == accountNo) {
 				account.setApproved(request.getApproved());
-	
+
 				// want the response to the user
 				accountResponse.setAccountNumber(accountNo);
 				accountResponse.setApproval(request.getApproved());
-				
+
 				customerRepo.save(currentCustomer);
 				return accountResponse;
-			} 
+			}
 		}
-		
-		// if we couldn't find the account number, we will throw the exception 
+
+		// if we couldn't find the account number, we will throw the exception
 		throw new NoDataFoundException("Please check Account Number");
 	}
 
 	@Override
 	public GetCustomerResponse getCustomer(long customerID) {
 		Customer customer = customerRepo.findById(customerID)
-				.orElseThrow(()-> new NoDataFoundException(
-						"Sorry, Customer with ID:" + customerID + " Not Found"));
+				.orElseThrow(() -> new NoDataFoundException("Sorry, Customer with ID:" + customerID + " Not Found"));
 		GetCustomerResponse response = new GetCustomerResponse();
 		response.setAadhar(customer.getAadhar());
 		response.setFullName(customer.getFullname());
@@ -141,19 +151,51 @@ public class CustomerServiceImpl implements CustomerService {
 	}
 
 	@Override
-	public UpdateCustomerResponse updateCustomer(long customerID, Customer customer) {
-		// TODO Auto-generated method stub
-		return null;
+	public UpdateCustomerResponse updateCustomer(long customerID, UpdateCustomerRequest customer) {
+		// Retrieve customer to be updated.
+		Customer fromRepo = customerRepo.findById(customerID)
+				.orElseThrow(() -> new NoDataFoundException("Customer ID not found"));
+		// Check each field of the request to see if it contains an update.
+		// and then apply the update to the retrieved customer
+		if (customer.getAadhar() != null)
+			fromRepo.setAadhar(customer.getAadhar());
+		if (customer.getAadharImage() != null)
+			fromRepo.setAadharImage(customer.getAadharImage());
+		if (customer.getFullname() != null)
+			fromRepo.setFullname(customer.getFullname());
+		if (customer.getPan() != null)
+			fromRepo.setPan(customer.getPan());
+		if (customer.getPanImage() != null)
+			fromRepo.setPanImage(customer.getPanImage());
+		if (customer.getPhone() != null)
+			fromRepo.setPhone(customer.getPhone());
+		if (customer.getSecretQuestion() != null)
+			fromRepo.setSecretQuestion(customer.getSecretQuestion());
+		if (customer.getSecretAnswer() != null)
+			fromRepo.setSecretAnswer(customer.getSecretAnswer());
+		// Save the customer back to the database
+		Customer updated = customerRepo.save(fromRepo);
+		// Generate the response payload from the updated customer.
+		UpdateCustomerResponse response = new UpdateCustomerResponse();
+		response.setCustomerId(customerID);
+		response.setFullname(updated.getFullname());
+		response.setPhone(updated.getPhone());
+		response.setPan(updated.getPan());
+		response.setAadhar(updated.getAadhar());
+		response.setSecretQuestion(updated.getSecretQuestion());
+		response.setSecretAnswer(updated.getSecretAnswer());
+		response.setPanImage(updated.getPanImage());
+		response.setAadharImage(updated.getAadharImage());
+		return response;
 	}
 
 	@Override
 	public AccountDetailsResponse getCustomerAccount(long customerID, long accountID) {
 		Customer customer = customerRepo.findById(customerID)
-				.orElseThrow(()-> new NoDataFoundException(
-						"Sorry, Customer with ID:" + customerID + " Not Found"));
+				.orElseThrow(() -> new NoDataFoundException("Sorry, Customer with ID:" + customerID + " Not Found"));
 		Set<Account> accounts = customer.getAccounts();
-		for(Account x: accounts) {
-			if(x.getAccountNumber()== accountID) {
+		for (Account x : accounts) {
+			if (x.getAccountNumber() == accountID) {
 				AccountDetailsResponse response = new AccountDetailsResponse();
 				response.setAccountNumber(x.getAccountNumber());
 				response.setAccountType(x.getAccountType());
@@ -168,20 +210,59 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Override
 	public String addBeneficiary(long customerID, AddBeneficiaryRequest request) {
-		// TODO Auto-generated method stub
-		return null;
+		// Retrieve the customer
+		Customer customer = customerRepo.findById(customerID).orElseThrow(
+				() -> new NoDataFoundException("Sorry Beneficiary With " + request.getAccountNumber() + " not added"));
+		// Retrieve the set of beneficiaries
+		Set<Beneficiary> beneficiaries = customer.getBeneficiaries();
+		// Create a new beneficiary to add
+		Beneficiary toBeAdded = new Beneficiary();
+		toBeAdded.setAccountNo(request.getAccountNumber());
+		toBeAdded.setAddedDate(LocalDate.now());
+		toBeAdded.setAccountType(request.getAccountType());
+		toBeAdded.setIsActive(IsActive.YES);
+		toBeAdded.setApproved(request.getApproved());
+		// add the beneficiary and save the customer to the repo.
+		beneficiaries.add(toBeAdded);
+		customerRepo.save(customer);
+		return "Beneficiary with " + request.getAccountNumber() + " added";
 	}
 
 	@Override
 	public List<BeneficiarySummary> getBeneficiaries(long customerID) {
-		// TODO Auto-generated method stub
-		return null;
+		// retrieve the customer
+		Customer customer = customerRepo.findById(customerID)
+				.orElseThrow(() -> new NoDataFoundException("Customer not found"));
+		// retrieve the beneficiaries
+		Set<Beneficiary> beneficiaries = customer.getBeneficiaries();
+		// create the list for summaries
+		List<BeneficiarySummary> summaries = new ArrayList<>();
+		// create the summaries
+		for (Beneficiary x : beneficiaries) {
+			BeneficiarySummary summary = new BeneficiarySummary();
+			summary.setActive(x.getIsActive());
+			summary.setBeneficiaryAccountNo(x.getAccountNo());
+			summary.setBeneficiaryName(x.getName());
+			summaries.add(summary);
+		}
+		return summaries;
 	}
 
 	@Override
 	public String deleteBeneficiary(long customerID, long beneficiaryID) {
-		// TODO Auto-generated method stub
-		return null;
+		Customer customer = customerRepo.findById(customerID)
+				.orElseThrow(() -> new NoDataFoundException("Customer ID not found"));
+		Set<Beneficiary> beneficiaries = customer.getBeneficiaries();
+		Iterator<Beneficiary> iterator = beneficiaries.iterator();
+		while (iterator.hasNext()) {
+			Beneficiary element = iterator.next();
+			if (element.getBeneficiaryId() == beneficiaryID) {
+				iterator.remove();
+				customerRepo.save(customer);
+				return "Beneficiary Deleted Successfully";
+			}
+		}
+		return "Beneficiary Not Delete";
 	}
 
 	@Override
@@ -210,15 +291,15 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Override
 	public List<AccountSummaryResponse> getCustomerAccounts(long customerID) {
-		//Get the customer
+		// Get the customer
 		Customer currentCustomer = customerRepo.findById(customerID)
-				.orElseThrow(()-> new NoDataFoundException("Customer not found"));
-		//Get the accounts
+				.orElseThrow(() -> new NoDataFoundException("Customer not found"));
+		// Get the accounts
 		Set<Account> accounts = currentCustomer.getAccounts();
-		//create a list for the summaries.
+		// create a list for the summaries.
 		List<AccountSummaryResponse> results = new ArrayList<>();
-		//generate the summaries from the accounts.
-		for(Account x : accounts) {
+		// generate the summaries from the accounts.
+		for (Account x : accounts) {
 			AccountSummaryResponse summary = new AccountSummaryResponse();
 			summary.setAccountNumber(x.getAccountNumber());
 			summary.setAccountType(x.getAccountType());
