@@ -4,6 +4,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,53 +31,55 @@ public class CustomerController {
 	@Autowired
 	CustomerService customerService;
 
-	@PostMapping("/:customerID/account")
+	@PostMapping("/{customerID}/account")
 	public ResponseEntity<?> createAccount(@PathVariable("customerID") Long customerId,
 			@Valid @RequestBody CreateAccountRequest request) {
+		System.out.println("Reached create account path.");
 		return ResponseEntity.ok(customerService.addAccount(customerId, request));
 	}
 
-	// @PreAuthorize("hasRole('STAFF')")
-	@PutMapping("/:customerID/account/:accountNo")
+	@PreAuthorize("hasRole('STAFF')")
+	@PutMapping("/{customerID}/account/{accountNo}")
 	public ResponseEntity<?> approveAccount(@PathVariable("customerID") Long customerId,
 			@PathVariable("accountNo") long accountNo, @Valid @RequestBody ApproveAccountRequest request) {
 		return ResponseEntity.ok(customerService.approveAccount(customerId, accountNo, request));
 	}
 
-	@GetMapping("/:customerID/account")
+	@GetMapping("/{customerID}/account")
 	public ResponseEntity<?> getAccounts(@PathVariable("customerID") Long customerId) {
 		return ResponseEntity.ok(customerService.getCustomerAccounts(customerId));
 	}
 
-	@GetMapping("/:customerID")
+	@GetMapping("/{customerID}")
 	public ResponseEntity<?> getCustomer(@PathVariable("customerID") Long customerId) {
 		return ResponseEntity.ok(customerService.getCustomer(customerId));
 	}
 
-	@GetMapping("/:customerID/account/:accountID")
+	@GetMapping("/{customerID}/account/{accountID}")
 	public ResponseEntity<?> getCustomerAccount(@PathVariable("customerID") Long customerId,
 			@PathVariable("accountID") Long accountId) {
 		return ResponseEntity.ok(customerService.getCustomerAccount(customerId, accountId));
 	}
 
-	@PutMapping("/:customerID")
+	@PutMapping("/{customerID}")
 	public ResponseEntity<?> updateCustomer(@Valid @PathVariable("customerID") Long customerId,
 			@RequestBody UpdateCustomerRequest request) {
 		return ResponseEntity.ok(customerService.updateCustomer(customerId, request));
 	}
 
-	@PostMapping("/:customerID/beneficiary")
+	@PostMapping("/{customerID}/beneficiary")
 	public ResponseEntity<?> addBeneficiary(@Valid @PathVariable("customerID") Long customerId,
 			@RequestBody AddBeneficiaryRequest request) {
+		//Need to deal with beneficiary name.
 		return ResponseEntity.ok(customerService.addBeneficiary(customerId, request));
 	}
 
-	@GetMapping("/:customerID/beneficiary")
+	@GetMapping("/{customerID}/beneficiary")
 	public ResponseEntity<?> getBeneficiaries(@PathVariable("customerID") Long customerId) {
 		return ResponseEntity.ok(customerService.getBeneficiaries(customerId));
 	}
 
-	@DeleteMapping("/:customerID/beneficiary/:beneficiaryID")
+	@DeleteMapping("/{customerID}/beneficiary/{beneficiaryID}")
 	public ResponseEntity<?> deleteBeneficiary(@PathVariable("customerID") Long customerId,
 			@PathVariable("beneficiaryID") Long beneficiaryId) {
 		return ResponseEntity.ok(customerService.deleteBeneficiary(customerId, beneficiaryId));
@@ -87,20 +90,20 @@ public class CustomerController {
 		return ResponseEntity.status(200).body(customerService.transferFunds(request));
 	}
 
-	@GetMapping("/:username/forgot/question")
+	@GetMapping("/{username}/forgot/question")
 	public ResponseEntity<?> getQuestion(@PathVariable("username") String username) {
 		return ResponseEntity.ok(customerService.getQuestion(username));
 	}
 
-	@GetMapping("/:username/forgot/answer")
+	@GetMapping("/{username}/forgot/answer")
 	public ResponseEntity<?> getQuestion(@PathVariable("username") String username,
 			@RequestBody SecretAnswerRequest answer) {
 		// May want this to produce JWT token on success, as per authenticate?
 		return ResponseEntity.ok(customerService.validateAnswer(username, answer));
 	}
 
-	// Preauthorize this one as customer?
-	@PutMapping("/:username/forgot")
+	@PreAuthorize("hasRole('CUSTOMER')")
+	@PutMapping("/{username}/forgot")
 	public ResponseEntity<?> updatePassword(@Valid @PathVariable("username") String username,
 			@RequestBody UpdatePasswordRequest request) {
 		return ResponseEntity.status(200).body(customerService.updatePassword(username, request));

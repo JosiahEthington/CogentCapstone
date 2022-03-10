@@ -16,6 +16,7 @@ import com.learning.entity.Customer;
 import com.learning.entity.Transaction;
 import com.learning.enums.EnabledStatus;
 import com.learning.enums.IsActive;
+import com.learning.enums.RoleName;
 import com.learning.exception.AccountCreationException;
 import com.learning.exception.NoDataFoundException;
 import com.learning.payload.request.AddBeneficiaryRequest;
@@ -37,6 +38,7 @@ import com.learning.payload.response.RegisterUserResponse;
 import com.learning.payload.response.UpdateCustomerResponse;
 import com.learning.repo.AccountRepo;
 import com.learning.repo.CustomerRepo;
+import com.learning.repo.RoleRepo;
 import com.learning.service.CustomerService;
 
 @Service
@@ -46,6 +48,8 @@ public class CustomerServiceImpl implements CustomerService {
 	CustomerRepo customerRepo;
 	@Autowired
 	AccountRepo accountRepo;
+	@Autowired
+	RoleRepo roleRepo;
 
 	@Override
 	public RegisterUserResponse registerCustomer(RegisterRequest request) {
@@ -56,6 +60,8 @@ public class CustomerServiceImpl implements CustomerService {
 		customer.setPassword(request.getPassword()); // should encrypt password here.
 		// customer creation date is now.
 		customer.setCreatedDate(LocalDate.now());
+		customer.getRoles().add(roleRepo.findByRoleName(RoleName.CUSTOMER)
+				.orElseThrow(() -> new NoDataFoundException("Customer Role Not Found")));
 		// save customer to DB
 		Customer temp = customerRepo.save(customer);
 		// Create response from the DB returned customer.
@@ -88,10 +94,13 @@ public class CustomerServiceImpl implements CustomerService {
 		newAccount.setAccountType(request.getAccountType());
 		newAccount.setApproved(request.getApproved());
 		newAccount.setAccountStatus(EnabledStatus.ENABLED);
-		newAccount.setCustomer(currentCustomer);
+		newAccount.setCustomerId(currentCustomer.getId());
 		newAccount.setDateOfCreation(LocalDate.now());
 		newAccount.setTransactions(new ArrayList<Transaction>());
+		//System.out.println(newAccount.getCustomerId());
+
 		// Add created account to customer.
+		//newAccount = accountRepo.save(newAccount);
 		currentCustomer.getAccounts().add(newAccount);
 		// Save customer to update list of accounts. The returned Customer should have
 		// the
@@ -105,7 +114,12 @@ public class CustomerServiceImpl implements CustomerService {
 		if (newAccounts.isEmpty() || newAccounts.size() > 1) {
 			throw new AccountCreationException("Account Creation Failed");
 		}
-		Account createdAccount = ((Account[]) newAccounts.toArray())[0];
+		//Account createdAccount = ((Account[]) newAccounts.toArray())[0];
+		Account createdAccount = null;
+		for(Account account : newAccounts) {
+			createdAccount = account;
+		}
+				
 		// Populate the response with the details of the new Account.
 		AccountCreationResponse result = new AccountCreationResponse();
 		result.setAccountType(createdAccount.getAccountType());
@@ -113,7 +127,7 @@ public class CustomerServiceImpl implements CustomerService {
 		result.setApproved(createdAccount.getApproved());
 		result.setAccountNumber(createdAccount.getAccountNumber());
 		result.setDateOfCreation(createdAccount.getDateOfCreation());
-		result.setCustomerId(createdAccount.getCustomer().getId());
+		result.setCustomerId(createdAccount.getCustomerId());
 
 		return result;
 	}
@@ -245,12 +259,15 @@ public class CustomerServiceImpl implements CustomerService {
 		// create the list for summaries
 		List<BeneficiarySummary> summaries = new ArrayList<>();
 		// create the summaries
-		for (Beneficiary x : beneficiaries) {
+		for (Beneficiary beneficiary : beneficiaries) {
 			BeneficiarySummary summary = new BeneficiarySummary();
-			summary.setActive(x.getIsActive());
-			summary.setBeneficiaryAccountNo(x.getAccountNo());
-			summary.setBeneficiaryName(x.getName());
+			summary.setActive(beneficiary.getIsActive());
+			summary.setBeneficiaryAccountNo(beneficiary.getAccountNo());
+			//TODO: Fix name to lookup by account no.
+			summary.setBeneficiaryName(beneficiary.getName());
+			summary.setBeneficiaryId(beneficiary.getBeneficiaryId());
 			summaries.add(summary);
+			
 		}
 		return summaries;
 	}

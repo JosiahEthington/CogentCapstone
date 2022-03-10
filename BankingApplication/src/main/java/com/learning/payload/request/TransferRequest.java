@@ -22,5 +22,5 @@ public class TransferRequest {
 	
 	private String reason;
 	@NotNull
-	private Customer customer;
+	private long customerId;
 }

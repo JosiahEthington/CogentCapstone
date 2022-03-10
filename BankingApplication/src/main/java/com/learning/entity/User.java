@@ -1,9 +1,12 @@
 package com.learning.entity;
 
+import java.util.Set;
+
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotBlank;
@@ -31,7 +34,6 @@ public abstract class User {
 	@NotBlank
 	@JsonIgnore
 	private String password;
-//	@ManyToOne
-//	@NotNull
-//	private Role role;
+	@OneToMany
+	private Set<Role> roles;
 }

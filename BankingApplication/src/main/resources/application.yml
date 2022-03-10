@@ -13,9 +13,14 @@ spring:
     hibernate:
       naming:
         physical-strategy: com.learning.utils.CustomNamingStrategy
-      ddl-auto: create
+      ddl-auto: update
 
 server:
   port: 9015
+
+com:
+  learning:
+    jwtSecret: bankapp
+    jwtExpirationMs: 86400000
 
 

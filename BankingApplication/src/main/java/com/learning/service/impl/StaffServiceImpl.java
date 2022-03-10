@@ -42,7 +42,8 @@ public class StaffServiceImpl implements StaffService {
 		AccountDetailsStaffResponse response = new AccountDetailsStaffResponse();
 		response.setAccountNumber(account.getAccountNumber());
 		response.setBalance(account.getAccountBalance());
-		response.setCustomerName(account.getCustomer().getFullname());
+		response.setCustomerName(customerRepo.findById(account.getCustomerId())
+				.orElseThrow(() -> new NoDataFoundException("Customer not found")).getFullname());
 		response.setTransactions(account.getTransactions());
 		return response;
 	}
@@ -88,7 +89,8 @@ public class StaffServiceImpl implements StaffService {
 			summary.setAccNo(account.getAccountNumber());
 			summary.setAccType(account.getAccountType().toString());
 			summary.setApproved(account.getApproved());
-			summary.setCustomerName(account.getCustomer().getFullname());
+			summary.setCustomerName(customerRepo.findById(account.getCustomerId())
+					.orElseThrow(() -> new NoDataFoundException("Customer not found")).getFullname());
 			summary.setDateCreated(account.getDateOfCreation());
 			summaries.add(summary);
 		}
@@ -126,19 +128,19 @@ public class StaffServiceImpl implements StaffService {
 
 	@Override
 	public String setCustomerEnabled(SetEnabledRequest request) {
-		//Get the customer
+		// Get the customer
 		Customer customer = customerRepo.findById(request.getId())
 				.orElseThrow(() -> new NoDataFoundException("Customer not found"));
-		//Update the status.
+		// Update the status.
 		customer.setStatus(request.getStatus());
-		//Save the update.
+		// Save the update.
 		customerRepo.save(customer);
 		return "Customer Status Updated";
 	}
 
 	@Override
 	public CustomerSummary getCustomer(Long customerId) {
-		//Get the customer
+		// Get the customer
 		Customer customer = customerRepo.findById(customerId)
 				.orElseThrow(() -> new NoDataFoundException("Customer not found"));
 		CustomerSummary summary = new CustomerSummary();
@@ -182,7 +184,7 @@ public class StaffServiceImpl implements StaffService {
 		toAccount.setAccountBalance(temp);
 		// Save the affected accounts.
 		accountRepo.save(fromAccount);
-		accountRepo.save(toAccount);	
+		accountRepo.save(toAccount);
 		return "Transfer Complete";
 	}
 

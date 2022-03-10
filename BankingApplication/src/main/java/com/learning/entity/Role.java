@@ -26,4 +26,8 @@ public class Role {
 	@NotNull
 	@Enumerated(EnumType.STRING)
 	private RoleName roleName;
+	public Role(@NotNull RoleName roleName) {
+		super();
+		this.roleName = roleName;
+	}
 }

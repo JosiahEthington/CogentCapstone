@@ -12,21 +12,27 @@ import com.learning.enums.RoleName;
 import com.learning.exception.NoDataFoundException;
 import com.learning.payload.request.CreateStaffRequest;
 import com.learning.payload.request.SetEnabledRequest;
+import com.learning.repo.RoleRepo;
 import com.learning.repo.StaffRepo;
 import com.learning.service.AdminService;
+
 @Service
 public class AdminServiceImpl implements AdminService {
 	@Autowired
 	StaffRepo staffRepo;
+	@Autowired
+	RoleRepo roleRepo;
 
 	@Override
 	public String createStaff(CreateStaffRequest request) {
+		// Create a new staff and set attributes by request.
 		Staff staff = new Staff();
 		staff.setFullname(request.getStaffFullName());
 		staff.setPassword(request.getStaffPassword());
 		staff.setUsername(request.getStaffUserName());
 		staff.setRoles(new HashSet<Role>());
-		staff.getRoles().add(new Role(2,RoleName.STAFF));
+		staff.getRoles().add(roleRepo.findByRoleName(RoleName.STAFF)
+				.orElseThrow(() -> new NoDataFoundException("Staff Role Not Found")));
 		staffRepo.save(staff);
 		return "Staff created";
 	}
@@ -39,7 +45,8 @@ public class AdminServiceImpl implements AdminService {
 
 	@Override
 	public String setEnabled(SetEnabledRequest request) {
-		Staff staff = staffRepo.findById(request.getId()).orElseThrow(()->new NoDataFoundException("Staff not found"));
+		Staff staff = staffRepo.findById(request.getId())
+				.orElseThrow(() -> new NoDataFoundException("Staff not found"));
 		staff.setStatus(request.getStatus());
 		staffRepo.save(staff);
 		return "Staff status updated";
