@@ -71,6 +71,7 @@ public class CustomerController {
 	public ResponseEntity<?> addBeneficiary(@Valid @PathVariable("customerID") Long customerId,
 			@RequestBody AddBeneficiaryRequest request) {
 		//Need to deal with beneficiary name.
+		System.out.println("Adding beneficiary");
 		return ResponseEntity.ok(customerService.addBeneficiary(customerId, request));
 	}
 
@@ -101,8 +102,7 @@ public class CustomerController {
 		// May want this to produce JWT token on success, as per authenticate?
 		return ResponseEntity.ok(customerService.validateAnswer(username, answer));
 	}
-
-	@PreAuthorize("hasRole('CUSTOMER')")
+	
 	@PutMapping("/{username}/forgot")
 	public ResponseEntity<?> updatePassword(@Valid @PathVariable("username") String username,
 			@RequestBody UpdatePasswordRequest request) {

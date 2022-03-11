@@ -8,11 +8,13 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.learning.entity.Account;
 import com.learning.entity.Beneficiary;
 import com.learning.entity.Customer;
+import com.learning.entity.Staff;
 import com.learning.entity.Transaction;
 import com.learning.enums.EnabledStatus;
 import com.learning.enums.IsActive;
@@ -39,6 +41,7 @@ import com.learning.payload.response.UpdateCustomerResponse;
 import com.learning.repo.AccountRepo;
 import com.learning.repo.CustomerRepo;
 import com.learning.repo.RoleRepo;
+import com.learning.repo.StaffRepo;
 import com.learning.service.CustomerService;
 
 @Service
@@ -50,6 +53,10 @@ public class CustomerServiceImpl implements CustomerService {
 	AccountRepo accountRepo;
 	@Autowired
 	RoleRepo roleRepo;
+	@Autowired
+	PasswordEncoder passwordEncoder;
+	@Autowired
+	StaffRepo staffRepo;
 
 	@Override
 	public RegisterUserResponse registerCustomer(RegisterRequest request) {
@@ -60,7 +67,7 @@ public class CustomerServiceImpl implements CustomerService {
 		customer.setPassword(request.getPassword()); // should encrypt password here.
 		// customer creation date is now.
 		customer.setCreatedDate(LocalDate.now());
-		customer.getRoles().add(roleRepo.findByRoleName(RoleName.CUSTOMER)
+		customer.getRoles().add(roleRepo.findByRoleName(RoleName.ROLE_CUSTOMER)
 				.orElseThrow(() -> new NoDataFoundException("Customer Role Not Found")));
 		// save customer to DB
 		Customer temp = customerRepo.save(customer);
@@ -71,13 +78,6 @@ public class CustomerServiceImpl implements CustomerService {
 		response.setPassword(temp.getPassword());// should be encrypted password.
 		response.setUsername(temp.getUsername());
 		return response;
-	}
-
-	@Override
-	public String authenticate(AuthenticateRequest request) {
-		Customer customer = customerRepo.findByUsername(request.getUsername())
-				.orElseThrow(() -> new NoDataFoundException("user not found"));
-		return "JWT TOKEN HERE";
 	}
 
 	@Override
@@ -245,6 +245,7 @@ public class CustomerServiceImpl implements CustomerService {
 		toBeAdded.setApproved(request.getApproved());
 		// add the beneficiary and save the customer to the repo.
 		beneficiaries.add(toBeAdded);
+		System.out.println(toBeAdded);
 		customerRepo.save(customer);
 		return "Beneficiary with " + request.getAccountNumber() + " added";
 	}
@@ -352,7 +353,7 @@ public class CustomerServiceImpl implements CustomerService {
 	public String updatePassword(String username, UpdatePasswordRequest request) {
 		Customer customer = customerRepo.findByUsername(username)
 				.orElseThrow(() -> new NoDataFoundException("Sorry password not updated"));
-		customer.setPassword(request.getNewPassword());
+		customer.setPassword(passwordEncoder.encode(request.getNewPassword()));
 		customerRepo.save(customer);
 		return "new password updated";
 	}

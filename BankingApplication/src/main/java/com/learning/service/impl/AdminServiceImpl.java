@@ -31,7 +31,7 @@ public class AdminServiceImpl implements AdminService {
 		staff.setPassword(request.getStaffPassword());
 		staff.setUsername(request.getStaffUserName());
 		staff.setRoles(new HashSet<Role>());
-		staff.getRoles().add(roleRepo.findByRoleName(RoleName.STAFF)
+		staff.getRoles().add(roleRepo.findByRoleName(RoleName.ROLE_STAFF)
 				.orElseThrow(() -> new NoDataFoundException("Staff Role Not Found")));
 		staffRepo.save(staff);
 		return "Staff created";

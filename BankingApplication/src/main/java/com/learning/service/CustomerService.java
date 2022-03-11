@@ -8,7 +8,6 @@ import com.learning.payload.response.*;
 
 public interface CustomerService {
 	public RegisterUserResponse registerCustomer(RegisterRequest request);
-	public String authenticate(AuthenticateRequest request);
 	public AccountCreationResponse addAccount(long customerID, CreateAccountRequest request);
 	public ApproveAccountResponse approveAccount(long customerID, long accountNo, ApproveAccountRequest request);
 	public List<AccountSummaryResponse> getCustomerAccounts(long customerID);

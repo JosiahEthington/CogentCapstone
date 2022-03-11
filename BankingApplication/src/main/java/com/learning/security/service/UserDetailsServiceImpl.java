@@ -32,6 +32,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 		if(user == null) {
 			throw new NoDataFoundException("user not found");
 		}
+		//System.out.println(user.getRoles());
 		return UserDetailsImpl.build(user);
 	}
 

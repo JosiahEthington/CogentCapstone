@@ -1,5 +1,5 @@
 package com.learning.enums;
 
 public enum RoleName {
-	CUSTOMER, STAFF, ADMIN
+	ROLE_CUSTOMER, ROLE_STAFF, ROLE_ADMIN
 }

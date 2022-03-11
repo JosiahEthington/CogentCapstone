@@ -21,7 +21,7 @@ public class StaffController {
 	@Autowired
 	StaffService staffService;
 
-	@GetMapping("/account/:accountNo")
+	@GetMapping("/account/{accountNo}")
 	public ResponseEntity<?> getAccountDetails(@PathVariable("accountNo") Long accountNo) {
 		return ResponseEntity.ok(staffService.getAccountDetails(accountNo));
 	}
@@ -56,7 +56,7 @@ public class StaffController {
 		return ResponseEntity.ok(staffService.setCustomerEnabled(request));
 	}
 
-	@GetMapping("/customer/:customerID")
+	@GetMapping("/customer/{customerID}")
 	public ResponseEntity<?> getCustomer(@PathVariable("customerID") Long customerId) {
 		return ResponseEntity.ok(staffService.getCustomer(customerId));
 	}

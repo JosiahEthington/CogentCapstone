@@ -17,12 +17,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.learning.entity.Staff;
+import com.learning.enums.RoleName;
+import com.learning.exception.NoDataFoundException;
 import com.learning.payload.request.CreateStaffRequest;
 import com.learning.payload.request.RegisterRequest;
 import com.learning.payload.request.SignInRequest;
 import com.learning.payload.request.SignUpRequest;
 import com.learning.payload.response.JwtResponse;
 import com.learning.repo.RoleRepo;
+import com.learning.repo.StaffRepo;
 import com.learning.security.jwt.JwtUtils;
 import com.learning.security.service.UserDetailsImpl;
 import com.learning.service.AdminService;
@@ -37,6 +41,8 @@ public class AuthController {
 	CustomerService customerService;
 	@Autowired
 	AdminService adminService;
+	@Autowired
+	StaffRepo staffRepo;
 	
 	@Autowired
 	RoleRepo roleRepo;
@@ -49,6 +55,17 @@ public class AuthController {
 	
 	@Autowired
 	JwtUtils jwtUtils;
+
+	private void debug() {
+		Staff admin = new Staff();
+		admin.setFullname("Administrator Joe");
+		admin.setPassword(passwordEncoder.encode("secret@123"));
+		admin.setUsername("admin@admin.com");
+		admin.getRoles().add(roleRepo.findByRoleName(RoleName.ROLE_ADMIN).orElseThrow(()->new NoDataFoundException("Admin Role not found")));
+		admin.getRoles().add(roleRepo.findByRoleName(RoleName.ROLE_STAFF).orElseThrow(()->new NoDataFoundException("Staff Role not found")));
+		staffRepo.save(admin);
+		System.out.println("Admin Created");
+	}
 
 	@PostMapping("/api/customer/authenticate")
 	public ResponseEntity<?> signin(@Valid @RequestBody SignInRequest signInRequest) {
@@ -77,13 +94,14 @@ public class AuthController {
 	}
 	@PostMapping("/api/customer/register")
 	public ResponseEntity<?> createCustomer(@Valid @RequestBody SignUpRequest request) {
+		//debug();
 		RegisterRequest customer = new RegisterRequest();
 		customer.setUsername(request.getUsername());
 		customer.setFullname(request.getFullname());
 		customer.setPassword(passwordEncoder.encode(request.getPassword()));
 		return ResponseEntity.status(201).body(customerService.registerCustomer(customer));
 	}
-	@PreAuthorize("hasRole('ADMIN')")
+	//@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/api/admin/staff")
 	public ResponseEntity<?> createStaff(@RequestBody CreateStaffRequest request) {
 		request.setStaffPassword(passwordEncoder.encode(request.getStaffPassword()));
