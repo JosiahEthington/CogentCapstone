@@ -5,6 +5,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,7 +24,7 @@ import com.learning.payload.request.UpdateCustomerRequest;
 import com.learning.payload.request.UpdatePasswordRequest;
 import com.learning.payload.response.AccountCreationResponse;
 import com.learning.service.CustomerService;
-
+@CrossOrigin
 @RestController
 @RequestMapping("/api/customer")
 public class CustomerController {
@@ -44,7 +45,8 @@ public class CustomerController {
 			@PathVariable("accountNo") long accountNo, @Valid @RequestBody ApproveAccountRequest request) {
 		return ResponseEntity.ok(customerService.approveAccount(customerId, accountNo, request));
 	}
-
+	
+	@CrossOrigin
 	@GetMapping("/{customerID}/account")
 	public ResponseEntity<?> getAccounts(@PathVariable("customerID") Long customerId) {
 		return ResponseEntity.ok(customerService.getCustomerAccounts(customerId));

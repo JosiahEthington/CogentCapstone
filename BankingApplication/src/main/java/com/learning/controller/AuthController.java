@@ -13,6 +13,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,7 +33,7 @@ import com.learning.security.service.UserDetailsImpl;
 import com.learning.service.AdminService;
 import com.learning.service.CustomerService;
 import com.learning.service.StaffService;
-
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 public class AuthController {
 	@Autowired
@@ -67,8 +68,9 @@ public class AuthController {
 		System.out.println("Admin Created");
 	}
 
-	@PostMapping("/api/customer/authenticate")
-	public ResponseEntity<?> signin(@Valid @RequestBody SignInRequest signInRequest) {
+
+	private ResponseEntity<?> signin(@Valid @RequestBody SignInRequest signInRequest) {
+		System.out.println(signInRequest.getUsername()+ " : " + signInRequest.getPassword());
 		Authentication authentication = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(
 				signInRequest.getUsername(), signInRequest.getPassword())); 
@@ -84,6 +86,12 @@ public class AuthController {
 				userDetailsImpl.getUsername(), 
 				roles));
 	}
+	
+	@PostMapping("/api/customer/authenticate")
+	public ResponseEntity<?> customerSignin(@Valid @RequestBody SignInRequest signInRequest) {
+		return signin(signInRequest);
+	}
+	
 	@PostMapping("/api/staff/authenticate")
 	public ResponseEntity<?> staffSignin(@Valid @RequestBody SignInRequest signInRequest) {
 		return signin(signInRequest);
