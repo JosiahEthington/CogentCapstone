@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.learning.payload.request.SetEnabledRequest;
 import com.learning.service.AdminService;
-@CrossOrigin(origins = "*", maxAge = 3600)
+//@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/admin")
 public class AdminController {

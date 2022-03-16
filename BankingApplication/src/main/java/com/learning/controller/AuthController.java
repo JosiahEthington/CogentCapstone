@@ -33,7 +33,7 @@ import com.learning.security.service.UserDetailsImpl;
 import com.learning.service.AdminService;
 import com.learning.service.CustomerService;
 import com.learning.service.StaffService;
-@CrossOrigin(origins = "*", maxAge = 3600)
+//@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 public class AuthController {
 	@Autowired

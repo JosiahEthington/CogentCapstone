@@ -24,7 +24,7 @@ import com.learning.payload.request.UpdateCustomerRequest;
 import com.learning.payload.request.UpdatePasswordRequest;
 import com.learning.payload.response.AccountCreationResponse;
 import com.learning.service.CustomerService;
-@CrossOrigin
+//@CrossOrigin
 @RestController
 @RequestMapping("/api/customer")
 public class CustomerController {
@@ -46,7 +46,7 @@ public class CustomerController {
 		return ResponseEntity.ok(customerService.approveAccount(customerId, accountNo, request));
 	}
 	
-	@CrossOrigin
+	//@CrossOrigin
 	@GetMapping("/{customerID}/account")
 	public ResponseEntity<?> getAccounts(@PathVariable("customerID") Long customerId) {
 		return ResponseEntity.ok(customerService.getCustomerAccounts(customerId));
