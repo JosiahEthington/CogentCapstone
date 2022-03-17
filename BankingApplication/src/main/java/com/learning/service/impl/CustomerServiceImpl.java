@@ -37,6 +37,7 @@ import com.learning.payload.response.GetCustomerResponse;
 import com.learning.payload.response.RegisterUserResponse;
 import com.learning.payload.response.UpdateCustomerResponse;
 import com.learning.repo.AccountRepo;
+import com.learning.repo.BeneficiaryRepo;
 import com.learning.repo.CustomerRepo;
 import com.learning.repo.RoleRepo;
 import com.learning.repo.StaffRepo;
@@ -55,6 +56,8 @@ public class CustomerServiceImpl implements CustomerService {
 	PasswordEncoder passwordEncoder;
 	@Autowired
 	StaffRepo staffRepo;
+	@Autowired
+	BeneficiaryRepo beneficiaryRepo;
 
 	@Override
 	public RegisterUserResponse registerCustomer(RegisterRequest request) {
@@ -241,6 +244,7 @@ public class CustomerServiceImpl implements CustomerService {
 		toBeAdded.setAccountType(request.getAccountType());
 		toBeAdded.setIsActive(IsActive.YES);
 		toBeAdded.setApproved(request.getApproved());
+		//toBeAdded.setCustomer(customer);
 		// add the beneficiary and save the customer to the repo.
 		beneficiaries.add(toBeAdded);
 		System.out.println(toBeAdded);
@@ -282,6 +286,7 @@ public class CustomerServiceImpl implements CustomerService {
 			if (element.getBeneficiaryId() == beneficiaryID) {
 				iterator.remove();
 				customerRepo.save(customer);
+				beneficiaryRepo.delete(element);
 				return "Beneficiary Deleted Successfully";
 			}
 		}

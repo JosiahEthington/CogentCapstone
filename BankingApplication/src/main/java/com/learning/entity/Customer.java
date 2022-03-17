@@ -6,6 +6,8 @@ import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.NotBlank;
 
@@ -47,6 +49,7 @@ public class Customer extends User {
 	@OneToMany(cascade = CascadeType.ALL)
 	private Set<Account> accounts = new HashSet<>();
 	
-	@OneToMany(cascade = CascadeType.ALL)
+	@OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY )
+	@JoinColumn(name="id", referencedColumnName = "id")
 	private Set<Beneficiary> beneficiaries = new HashSet<>();
 }

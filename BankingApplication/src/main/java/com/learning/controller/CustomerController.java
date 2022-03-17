@@ -24,7 +24,7 @@ import com.learning.payload.request.UpdateCustomerRequest;
 import com.learning.payload.request.UpdatePasswordRequest;
 import com.learning.payload.response.AccountCreationResponse;
 import com.learning.service.CustomerService;
-//@CrossOrigin
+@CrossOrigin("*")
 @RestController
 @RequestMapping("/api/customer")
 public class CustomerController {

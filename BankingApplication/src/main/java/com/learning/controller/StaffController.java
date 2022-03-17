@@ -15,7 +15,7 @@ import com.learning.payload.request.ApproveBeneficiaryRequest;
 import com.learning.payload.request.SetEnabledRequest;
 import com.learning.payload.request.TransferRequestStaff;
 import com.learning.service.StaffService;
-//@CrossOrigin(origins = "*", maxAge = 3600)
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/staff")
 public class StaffController {
