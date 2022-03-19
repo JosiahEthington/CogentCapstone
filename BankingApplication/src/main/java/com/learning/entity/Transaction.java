@@ -27,7 +27,8 @@ public class Transaction {
 	private String reference;
 	private double amount;
 	//private TransactionType type;
-	
+	private long fromAccountNum;
+	private long toAccountNum;
 	@ManyToOne
 	@NotNull
 	@JsonIgnore

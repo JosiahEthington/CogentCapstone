@@ -309,6 +309,8 @@ public class CustomerServiceImpl implements CustomerService {
 		transaction.setAmount(request.getAmount());
 		transaction.setDateTime(LocalDateTime.now());
 		transaction.setReference(request.getReason());
+		transaction.setFromAccountNum(request.getFromAccount());
+		transaction.setToAccountNum(request.getToAccount());
 		// Add the transaction to the affected accounts.
 		fromAccount.getTransactions().add(transaction);
 		toAccount.getTransactions().add(transaction);
