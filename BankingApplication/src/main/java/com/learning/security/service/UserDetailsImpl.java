@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.learning.entity.User;
+import com.learning.enums.EnabledStatus;
 
 import lombok.Data;
 
@@ -21,13 +22,15 @@ public class UserDetailsImpl implements UserDetails {
 	private String username;
 	@JsonIgnore
 	private String password;
+	private EnabledStatus status;
 	public Collection<? extends GrantedAuthority> authorities;
 
-	private UserDetailsImpl(Long id, String username, String password,
+	private UserDetailsImpl(Long id, String username, EnabledStatus status, String password,
 			Collection<? extends GrantedAuthority> authorities) {
 		this.id = id;
 		this.username = username;
 		this.password = password;
+		this.status=status;
 		this.authorities = authorities;
 	}
 
@@ -35,7 +38,7 @@ public class UserDetailsImpl implements UserDetails {
 		List<GrantedAuthority> authorities = user.getRoles().stream()
 				.map(role -> new SimpleGrantedAuthority(role.getRoleName().name())).collect(Collectors.toList());
 		//System.out.println(authorities);
-		return new UserDetailsImpl(user.getId(), user.getUsername(), user.getPassword(), authorities);
+		return new UserDetailsImpl(user.getId(), user.getUsername(), user.getStatus(), user.getPassword(), authorities);
 	}
 
 	@Override
@@ -72,8 +75,7 @@ public class UserDetailsImpl implements UserDetails {
 
 	@Override
 	public boolean isEnabled() {
-		// TODO Auto-generated method stub
-		return true;
+		return status.value();
 	}
 
 	public boolean equals(Object o) {

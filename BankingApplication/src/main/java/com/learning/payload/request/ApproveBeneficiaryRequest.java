@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ApproveBeneficiaryRequest {
-	private long fromCustomer;
+	private long beneficiaryId;
 	private long beneficiaryAccount;
 	@NotNull
 	private LocalDate beneficiaryAddedDate;

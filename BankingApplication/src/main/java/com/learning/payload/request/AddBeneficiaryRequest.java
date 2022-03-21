@@ -17,4 +17,5 @@ public class AddBeneficiaryRequest {
 	@NotNull
 	private AccountType accountType;
 	private String approved = "no";
+	private String name = "";
 }

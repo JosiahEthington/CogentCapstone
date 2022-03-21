@@ -21,5 +21,7 @@ public interface CustomerService {
 	public String getQuestion(String username);
 	public String validateAnswer(String username, SecretAnswerRequest answer);
 	public String updatePassword(String username, UpdatePasswordRequest request);
+	String setAccountEnabled(SetEnabledRequest request);
+	List<BeneficiarySummary> getActiveBeneficiaries(long customerID);
 	
 }

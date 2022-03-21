@@ -19,6 +19,7 @@ import com.learning.payload.request.AddBeneficiaryRequest;
 import com.learning.payload.request.ApproveAccountRequest;
 import com.learning.payload.request.CreateAccountRequest;
 import com.learning.payload.request.SecretAnswerRequest;
+import com.learning.payload.request.SetEnabledRequest;
 import com.learning.payload.request.TransferRequest;
 import com.learning.payload.request.UpdateCustomerRequest;
 import com.learning.payload.request.UpdatePasswordRequest;
@@ -35,7 +36,7 @@ public class CustomerController {
 	@PostMapping("/{customerID}/account")
 	public ResponseEntity<?> createAccount(@PathVariable("customerID") Long customerId,
 			@Valid @RequestBody CreateAccountRequest request) {
-		System.out.println("Reached create account path.");
+		//System.out.println("Reached create account path.");
 		return ResponseEntity.ok(customerService.addAccount(customerId, request));
 	}
 
@@ -50,6 +51,11 @@ public class CustomerController {
 	@GetMapping("/{customerID}/account")
 	public ResponseEntity<?> getAccounts(@PathVariable("customerID") Long customerId) {
 		return ResponseEntity.ok(customerService.getCustomerAccounts(customerId));
+	}
+	@PutMapping("/accountStatus")
+	public ResponseEntity<?> updateAccountStatus(@RequestBody SetEnabledRequest request){
+		System.out.println("in update status request.");
+		return ResponseEntity.ok(customerService.setAccountEnabled(request));
 	}
 
 	@GetMapping("/{customerID}")
@@ -73,7 +79,7 @@ public class CustomerController {
 	public ResponseEntity<?> addBeneficiary(@Valid @PathVariable("customerID") Long customerId,
 			@RequestBody AddBeneficiaryRequest request) {
 		//Need to deal with beneficiary name.
-		System.out.println("Adding beneficiary");
+		//System.out.println("Adding beneficiary");
 		return ResponseEntity.ok(customerService.addBeneficiary(customerId, request));
 	}
 
@@ -81,7 +87,10 @@ public class CustomerController {
 	public ResponseEntity<?> getBeneficiaries(@PathVariable("customerID") Long customerId) {
 		return ResponseEntity.ok(customerService.getBeneficiaries(customerId));
 	}
-
+	@GetMapping("/{customerID}/activeBeneficiary")
+	public ResponseEntity<?> getActiveBeneficiaries(@PathVariable("customerID") Long customerId) {
+		return ResponseEntity.ok(customerService.getActiveBeneficiaries(customerId));
+	}
 	@DeleteMapping("/{customerID}/beneficiary/{beneficiaryID}")
 	public ResponseEntity<?> deleteBeneficiary(@PathVariable("customerID") Long customerId,
 			@PathVariable("beneficiaryID") Long beneficiaryId) {

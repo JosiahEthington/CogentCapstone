@@ -1,5 +1,6 @@
 package com.learning.entity;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -13,6 +14,7 @@ import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotBlank;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.learning.enums.EnabledStatus;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -36,6 +38,9 @@ public abstract class User {
 	@NotBlank
 	@JsonIgnore
 	private String password;
+	
+	private EnabledStatus status = EnabledStatus.ENABLED;
+
 	@ManyToMany
-	private Set<Role> roles;
+	private Set<Role> roles = new HashSet<Role>();
 }

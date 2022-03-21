@@ -21,13 +21,10 @@ import lombok.NoArgsConstructor;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
+@NoArgsConstructor
 @Entity
 public class Customer extends User {
 
-	public Customer() {
-		super();
-		this.setRoles(new HashSet<Role>());
-	}
 	private String phone;
 	
 	private String pan;
@@ -43,9 +40,7 @@ public class Customer extends User {
 	private String secretAnswer;
 	
 	private LocalDate createdDate;
-	
-	private EnabledStatus status = EnabledStatus.ENABLED;
-	
+		
 	@OneToMany(cascade = CascadeType.ALL)
 	private Set<Account> accounts = new HashSet<>();
 	

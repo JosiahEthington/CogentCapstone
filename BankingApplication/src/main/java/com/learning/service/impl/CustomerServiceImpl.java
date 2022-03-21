@@ -25,6 +25,7 @@ import com.learning.payload.request.ApproveAccountRequest;
 import com.learning.payload.request.CreateAccountRequest;
 import com.learning.payload.request.RegisterRequest;
 import com.learning.payload.request.SecretAnswerRequest;
+import com.learning.payload.request.SetEnabledRequest;
 import com.learning.payload.request.TransferRequest;
 import com.learning.payload.request.UpdateCustomerRequest;
 import com.learning.payload.request.UpdatePasswordRequest;
@@ -98,10 +99,10 @@ public class CustomerServiceImpl implements CustomerService {
 		newAccount.setCustomerId(currentCustomer.getId());
 		newAccount.setDateOfCreation(LocalDate.now());
 		newAccount.setTransactions(new ArrayList<Transaction>());
-		//System.out.println(newAccount.getCustomerId());
+		// System.out.println(newAccount.getCustomerId());
 
 		// Add created account to customer.
-		//newAccount = accountRepo.save(newAccount);
+		// newAccount = accountRepo.save(newAccount);
 		currentCustomer.getAccounts().add(newAccount);
 		// Save customer to update list of accounts. The returned Customer should have
 		// the
@@ -115,12 +116,12 @@ public class CustomerServiceImpl implements CustomerService {
 		if (newAccounts.isEmpty() || newAccounts.size() > 1) {
 			throw new AccountCreationException("Account Creation Failed");
 		}
-		//Account createdAccount = ((Account[]) newAccounts.toArray())[0];
+		// Account createdAccount = ((Account[]) newAccounts.toArray())[0];
 		Account createdAccount = null;
-		for(Account account : newAccounts) {
+		for (Account account : newAccounts) {
 			createdAccount = account;
 		}
-				
+
 		// Populate the response with the details of the new Account.
 		AccountCreationResponse result = new AccountCreationResponse();
 		result.setAccountType(createdAccount.getAccountType());
@@ -160,6 +161,25 @@ public class CustomerServiceImpl implements CustomerService {
 	}
 
 	@Override
+	public String setAccountEnabled(SetEnabledRequest request) {
+		// find the current customer
+		System.out.println(request);
+		System.out.println("Line 1");
+		Account currentAccount = accountRepo.findById(request.getId())
+				.orElseThrow(() -> new NoDataFoundException("Account Not Found"));
+		// get all the accounts
+		// for each loop to iterate the accounts
+		System.out.println("Line 2");
+		currentAccount.setAccountStatus(request.getStatus());
+		System.out.println("Line 3");
+		// System.out.println(currentAccount);
+		System.out.println("Line 4");
+		accountRepo.save(currentAccount);
+		System.out.println("Done");
+		return "Account status updated";
+	}
+
+	@Override
 	public GetCustomerResponse getCustomer(long customerID) {
 		Customer customer = customerRepo.findById(customerID)
 				.orElseThrow(() -> new NoDataFoundException("Sorry, Customer with ID:" + customerID + " Not Found"));
@@ -179,21 +199,23 @@ public class CustomerServiceImpl implements CustomerService {
 				.orElseThrow(() -> new NoDataFoundException("Customer ID not found"));
 		// Check each field of the request to see if it contains an update.
 		// and then apply the update to the retrieved customer
-		if (customer.getAadhar() != null)
+		System.out.println("In updateCustomer");
+		System.out.println(customer);
+		if (customer.getAadhar() != null && !customer.getAadhar().isBlank())
 			fromRepo.setAadhar(customer.getAadhar());
-		if (customer.getAadharImage() != null)
+		if (customer.getAadharImage() != null && !customer.getAadharImage().isBlank())
 			fromRepo.setAadharImage(customer.getAadharImage());
-		if (customer.getFullname() != null)
+		if (customer.getFullname() != null && !customer.getFullname().isBlank())
 			fromRepo.setFullname(customer.getFullname());
-		if (customer.getPan() != null)
+		if (customer.getPan() != null && !customer.getPan().isBlank())
 			fromRepo.setPan(customer.getPan());
-		if (customer.getPanImage() != null)
+		if (customer.getPanImage() != null && !customer.getPanImage().isBlank())
 			fromRepo.setPanImage(customer.getPanImage());
-		if (customer.getPhone() != null)
+		if (customer.getPhone() != null && !customer.getPhone().isBlank())
 			fromRepo.setPhone(customer.getPhone());
-		if (customer.getSecretQuestion() != null)
+		if (customer.getSecretQuestion() != null && !customer.getSecretQuestion().isBlank())
 			fromRepo.setSecretQuestion(customer.getSecretQuestion());
-		if (customer.getSecretAnswer() != null)
+		if (customer.getSecretAnswer() != null && !customer.getSecretAnswer().isBlank())
 			fromRepo.setSecretAnswer(customer.getSecretAnswer());
 		// Save the customer back to the database
 		Customer updated = customerRepo.save(fromRepo);
@@ -244,7 +266,8 @@ public class CustomerServiceImpl implements CustomerService {
 		toBeAdded.setAccountType(request.getAccountType());
 		toBeAdded.setIsActive(IsActive.YES);
 		toBeAdded.setApproved(request.getApproved());
-		//toBeAdded.setCustomer(customer);
+		toBeAdded.setName(request.getName());
+		// toBeAdded.setCustomer(customer);
 		// add the beneficiary and save the customer to the repo.
 		beneficiaries.add(toBeAdded);
 		System.out.println(toBeAdded);
@@ -266,11 +289,35 @@ public class CustomerServiceImpl implements CustomerService {
 			BeneficiarySummary summary = new BeneficiarySummary();
 			summary.setActive(beneficiary.getIsActive());
 			summary.setBeneficiaryAccountNo(beneficiary.getAccountNo());
-			//TODO: Fix name to lookup by account no.
+			// TODO: Fix name to lookup by account no.
 			summary.setBeneficiaryName(beneficiary.getName());
 			summary.setBeneficiaryId(beneficiary.getBeneficiaryId());
 			summaries.add(summary);
-			
+
+		}
+		return summaries;
+	}
+	@Override
+	public List<BeneficiarySummary> getActiveBeneficiaries(long customerID) {
+		// retrieve the customer
+		Customer customer = customerRepo.findById(customerID)
+				.orElseThrow(() -> new NoDataFoundException("Customer not found"));
+		// retrieve the beneficiaries
+		Set<Beneficiary> beneficiaries = customer.getBeneficiaries();
+		// create the list for summaries
+		List<BeneficiarySummary> summaries = new ArrayList<>();
+		// create the summaries
+		for (Beneficiary beneficiary : beneficiaries) {
+			if (beneficiary.getApproved().equals("yes")) {
+				BeneficiarySummary summary = new BeneficiarySummary();
+				summary.setActive(beneficiary.getIsActive());
+				summary.setBeneficiaryAccountNo(beneficiary.getAccountNo());
+				// TODO: Fix name to lookup by account no.
+				summary.setBeneficiaryName(beneficiary.getName());
+				summary.setBeneficiaryId(beneficiary.getBeneficiaryId());
+				summaries.add(summary);
+			}
+
 		}
 		return summaries;
 	}

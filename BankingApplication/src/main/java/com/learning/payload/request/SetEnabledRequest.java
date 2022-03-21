@@ -12,5 +12,4 @@ import lombok.NoArgsConstructor;
 public class SetEnabledRequest {
 	private Long id;
 	private EnabledStatus status;
-	
 }

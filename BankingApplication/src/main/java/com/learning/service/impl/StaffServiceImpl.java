@@ -56,26 +56,30 @@ public class StaffServiceImpl implements StaffService {
 
 	@Override
 	public ApproveBeneficiaryResponse approveBeneficiary(ApproveBeneficiaryRequest request) {
-		// Retrieve the customer
-		Customer customer = customerRepo.findById(request.getFromCustomer())
-				.orElseThrow(() -> new NoDataFoundException("Customer not found"));
-		Beneficiary toBeApproved = null;
-		// Match the beneficiary account no to the customer's beneficiary list.
-		for (Beneficiary beneficiary : customer.getBeneficiaries()) {
-			if (beneficiary.getAccountNo() == request.getBeneficiaryAccount()) {
-				toBeApproved = beneficiary;
-			}
-		}
+//		// Retrieve the customer
+//		System.out.println(request.getFromCustomer());
+//		Customer customer = customerRepo.findById(request.getFromCustomer())
+//				.orElseThrow(() -> new NoDataFoundException("Customer not found"));
+//		Beneficiary toBeApproved = null;
+//		System.out.println(customer);
+//		// Match the beneficiary account no to the customer's beneficiary list.
+//		for (Beneficiary beneficiary : customer.getBeneficiaries()) {
+//			System.out.println(beneficiary.getAccountNo());
+//			if (beneficiary.getAccountNo() == request.getBeneficiaryAccount()) {
+//				toBeApproved = beneficiary;
+//			}
+//		}
+		Beneficiary toBeApproved = beneficiaryRepo.findById(request.getBeneficiaryId())
+				.orElseThrow(()->new NoDataFoundException("Beneficiary Not Found"));
 		// Set approved to desired status.
 		toBeApproved.setApproved(request.getApproved());
 		// Save changes to customer(and hence to list of beneficiaries)
-		customerRepo.save(customer);
+		beneficiaryRepo.save(toBeApproved);
 
 		// Create and set response payload.
 		ApproveBeneficiaryResponse response = new ApproveBeneficiaryResponse();
 		response.setApproved(toBeApproved.getApproved());
 		response.setBeneficiaryAccount(toBeApproved.getAccountNo());
-		response.setFromCustomer(customer.getId());
 		response.setBeneficiaryAddedDate(toBeApproved.getAddedDate());
 		return response;
 	}
@@ -100,7 +104,7 @@ public class StaffServiceImpl implements StaffService {
 	@Override
 	public ApproveAccountResponse approveAccount(ApproveAccountRequest request) {
 		// Get the account
-		Account account = accountRepo.getById(request.getAccountNumber());
+		Account account = accountRepo.findById(request.getAccountNumber()).orElseThrow(()-> new NoDataFoundException("Account not found"));
 		// Set the approval
 		account.setApproved(request.getApproved());
 		// save to the DB
@@ -121,6 +125,7 @@ public class StaffServiceImpl implements StaffService {
 			summary.setCustomerId(customer.getId());
 			summary.setCustomerName(customer.getFullname());
 			summary.setStatus(customer.getStatus());
+			System.out.println(customer.getStatus());
 			response.add(summary);
 		}
 		return response;
@@ -158,8 +163,10 @@ public class StaffServiceImpl implements StaffService {
 		Account fromAccount = accountRepo.findById(request.getFromAccount())
 				.orElseThrow(() -> new NoDataFoundException("From Account Not Valid"));
 		transaction.setFromAccount(fromAccount);
+		transaction.setFromAccountNum(fromAccount.getAccountNumber());
 		Account toAccount = accountRepo.findById(request.getToAccount())
 				.orElseThrow(() -> new NoDataFoundException("To Account Not Valid"));
+		transaction.setToAccountNum(toAccount.getAccountNumber());
 		transaction.setToAccount(toAccount);
 		// if we want to do validity checking, here would be good. From Account should
 		// be part of request.customer's Account Set. To Account should be part of
